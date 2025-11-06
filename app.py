@@ -8,7 +8,7 @@ import requests
 # CONFIG
 # ========================
 st.set_page_config(
-    page_title="Honkai Star Rail – Diabetes Risk System",
+    page_title="Diabetes Risk System",
     page_icon="⭐",
     layout="centered"
 )
@@ -60,7 +60,6 @@ def set_background(img_url):
     """
     st.markdown(bg, unsafe_allow_html=True)
 
-# ✅ SET BACKGROUND – bạn có thể đổi link ảnh khác
 set_background("https://i.imgur.com/RD6u7FW.jpeg")
 
 # ========================
@@ -77,7 +76,7 @@ lottie = load_lottie("https://assets8.lottiefiles.com/packages/lf20_gljxf5vs.jso
 # ========================
 # PAGE HEADER
 # ========================
-st.markdown("<h1>⚡ HSR • Hệ thống dự đoán nguy cơ đái tháo đường ⚡</h1>", unsafe_allow_html=True)
+st.markdown("<h1>Hệ thống dự đoán nguy cơ đái tháo đường</h1>", unsafe_allow_html=True)
 
 if lottie:
     st_lottie(lottie, height=180, key="anim")
@@ -85,7 +84,7 @@ if lottie:
 st.markdown(
     """
     <div style='text-align:center; font-size:18px'>
-    Công nghệ chẩn đoán mô phỏng của <b>Honkai Star Rail</b> — không cần xét nghiệm hay máy đo.<br>
+     không cần xét nghiệm hay máy đo.<br>
     Trả lời vài câu hỏi, hệ thống sẽ tính nguy cơ sức khỏe của bạn.
     </div>
     """,
@@ -95,9 +94,9 @@ st.markdown(
 # ========================
 # INPUT QUESTIONS
 # ========================
-st.subheader("🚀 Bắt đầu kiểm tra:")
+st.subheader("Bắt đầu kiểm tra:")
 
-age = st.slider("➤ Tuổi của bạn:", 10, 80, 20)
+age = st.slider("➤ Tuổi của bạn:", 1, 80, 20)
 activity = st.selectbox("➤ Mức hoạt động hàng ngày:", [
     "Hầu như không vận động",
     "Dưới 30 phút",
@@ -152,14 +151,14 @@ if st.button("🔮 Dự đoán"):
 
     st.markdown("## ⭐ Kết quả phân tích:")
     st.progress(risk / 100)
-    st.write(f"### ✅ Nguy cơ ước tính: **{risk:.1f}%**")
+    st.write(f"### Nguy cơ ước tính: **{risk:.1f}%**")
 
     if risk >= 70:
-        st.error("🚨 Nguy cơ cao — hãy đến bệnh viện để xét nghiệm chính xác.")
+        st.error("Nguy cơ cao — hãy đến bệnh viện để xét nghiệm chính xác.")
     elif risk >= 40:
         st.warning("⚠ Nguy cơ trung bình — nên tập thể dục và hạn chế đồ ngọt.")
     else:
-        st.success("✅ Nguy cơ thấp — giữ lối sống hiện tại!")
+        st.success("Nguy cơ thấp — giữ lối sống hiện tại!")
 
 st.markdown("<hr>", unsafe_allow_html=True)
-st.caption("✨ Công cụ mô phỏng — không thay thế chẩn đoán y tế. Hãy khám bác sĩ nếu có triệu chứng bất thường.")
+st.caption("Công cụ mô phỏng — không thay thế chẩn đoán y tế. Hãy khám bác sĩ nếu có triệu chứng bất thường.")
