@@ -40,8 +40,8 @@ def set_background(img_path):
 
 set_background(BACKGROUND_IMAGE_PATH)
 
-st.title("DỰ ĐOÁN NGUY CƠ MẮC TIỂU ĐƯỜNG (KHÔNG CẦN MÁY ĐO)")
-st.markdown("Chỉ cần trả lời một số câu hỏi đơn giản — không xét nghiệm, không thiết bị.")
+st.title("DỰ ĐOÁN NGUY CƠ MẮC TIỂU ĐƯỜNG")
+st.markdown("Chỉ cần trả lời một số câu hỏi đơn giản")
 
 # ----------------------------------------
 # CÂU HỎI – TỰ KHAI
@@ -129,4 +129,4 @@ if st.button("🔍 Dự đoán nguy cơ"):
         st.info("✅ Nguy cơ thấp – hãy giữ lối sống lành mạnh.")
 
 st.markdown("---")
-st.caption("🩺 Công cụ chỉ mang tính tham khảo — không thay thế bác sĩ.")
+st.caption("Công cụ chỉ mang tính tham khảo — không thay thế bác sĩ.")
