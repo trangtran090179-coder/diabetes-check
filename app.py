@@ -16,11 +16,11 @@ st.set_page_config(
 # ========================
 # BACKGROUND + CSS
 # ========================
-def set_background(img_url):
+def set_background(img_path):
     bg = f"""
     <style>
     [data-testid="stAppViewContainer"] {{
-        background-image: url("{img_url}");
+        background-image: url("{img_path}");
         background-size: cover;
         background-position: center;
     }}
