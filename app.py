@@ -1,129 +1,91 @@
 import streamlit as st
 import numpy as np
 import base64
-from streamlit_lottie import st_lottie
-import requests
 
-# ========================
-# CONFIG
-# ========================
 st.set_page_config(
-    page_title="Diabetes Risk System",
-    page_icon="",
-    layout="centered"
+    page_title="Diabetes Home Risk Checker",
+    layout="centered",
+    initial_sidebar_state="collapsed"
 )
 
-# ========================
-# BACKGROUND + CSS
-# ========================
+BACKGROUND_IMAGE_PATH = "castorice-honkai-7680x4320-22114.jpg"
+
 def set_background(img_path):
-    bg = f"""
+    with open(img_path, "rb") as f:
+        data = f.read()
+    b64 = base64.b64encode(data).decode()
+    css = f"""
     <style>
     [data-testid="stAppViewContainer"] {{
-        background-image: url("{img_path}");
+        background-image: url("data:image/jpg;base64,{b64}");
         background-size: cover;
         background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
     }}
-
     div.block-container {{
-        background: rgba(10, 10, 25, 0.78);
+        background: rgba(255, 255, 255, 0.85);
         border-radius: 20px;
-        padding: 30px;
-        box-shadow: 0 0 25px rgba(120, 180, 255, 0.3);
-        color: #e6f2ff;
-        border: 1px solid rgba(180, 220, 255, 0.25);
+        padding: 2rem;
+        box-shadow: 0 4px 25px rgba(0,0,0,0.15);
+        color: #222;
     }}
-
     h1, h2, h3 {{
+        color: #e63946;
         text-align: center;
-        font-weight: bold;
-        color: #9cc9ff;
-        text-shadow: 0px 0px 8px #7bbaff;
-    }}
-
-    .stButton>button {{
-        background: linear-gradient(135deg, #4a9fff, #7a47ff);
-        border: none;
-        border-radius: 12px;
-        color: white;
-        font-size: 18px;
-        padding: 10px 25px;
-        cursor: pointer;
-        box-shadow: 0px 0px 10px #7bc4ff;
-    }}
-
-    .stButton>button:hover {{
-        background: linear-gradient(135deg, #3478ff, #5527ff);
-        box-shadow: 0px 0px 15px #b6e0ff;
     }}
     </style>
     """
-    st.markdown(bg, unsafe_allow_html=True)
+    st.markdown(css, unsafe_allow_html=True)
 
-set_background("castorice-honkai-7680x4320-22114.jpg")
+set_background(BACKGROUND_IMAGE_PATH)
 
-# ========================
-# LOTTIE ANIMATION
-# ========================
-def load_lottie(url):
-    r = requests.get(url)
-    if r.status_code == 200:
-        return r.json()
-    return None
+st.title("DỰ ĐOÁN NGUY CƠ MẮC TIỂU ĐƯỜNG (KHÔNG CẦN MÁY ĐO)")
+st.markdown("Chỉ cần trả lời một số câu hỏi đơn giản — không xét nghiệm, không thiết bị.")
 
-lottie = load_lottie("https://assets8.lottiefiles.com/packages/lf20_gljxf5vs.json")
+# ----------------------------------------
+# CÂU HỎI – TỰ KHAI
+# ----------------------------------------
+age = st.number_input("Tuổi của bạn:", min_value=1, max_value=120, step=1)
 
-# ========================
-# PAGE HEADER
-# ========================
-st.markdown("<h1>Hệ thống dự đoán nguy cơ đái tháo đường</h1>", unsafe_allow_html=True)
-
-if lottie:
-    st_lottie(lottie, height=180, key="anim")
-
-st.markdown(
-    """
-    <div style='text-align:center; font-size:18px'>
-    <br>
-    Trả lời vài câu hỏi, hệ thống sẽ tính nguy cơ sức khỏe của bạn.
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-# ========================
-# INPUT QUESTIONS
-# ========================
-st.subheader("Bắt đầu kiểm tra:")
-
-age = st.slider("➤ Tuổi của bạn:", 1, 80, 20)
-activity = st.selectbox("➤ Mức hoạt động hàng ngày:", [
-    "Hầu như không vận động",
-    "Dưới 30 phút",
+activity = st.selectbox("Bạn vận động bao lâu mỗi ngày?", [
+    "Ít hoặc không vận động",
+    "10–30 phút",
     "30–60 phút",
     "Trên 1 giờ"
 ])
-sweet = st.selectbox("➤ Mức độ ăn/uống đồ ngọt:", [
-    "Hiếm khi",
+
+sweet_drink = st.selectbox("Bạn uống nước ngọt/đồ uống có đường?", [
+    "Hầu như không",
     "1–2 lần/tuần",
     "3–6 lần/tuần",
     "Mỗi ngày"
 ])
-family = st.selectbox("➤ Gia đình có người mắc tiểu đường?", ["Không", "Có"])
+
+family = st.selectbox("Gia đình có người mắc đái tháo đường?", ["Không", "Có"])
+
 symptoms = st.multiselect(
-    "➤ Bạn có dấu hiệu nào sau đây?",
-    ["Khát nhiều", "Đi tiểu nhiều", "Ủ rũ/mệt mỏi", "Giảm cân nhanh", "Hay đói nhanh"]
+    "Bạn có các triệu chứng sau không?",
+    ["Khát nước nhiều", "Đi tiểu nhiều", "Giảm cân nhanh", "Mệt mỏi", "Nhìn mờ"]
 )
-belly = st.selectbox("➤ Tình trạng vòng bụng:", [
+
+belly = st.selectbox("Vòng bụng của bạn như thế nào?", [
     "Bình thường",
     "Hơi to",
-    "To rõ"
+    "To rõ",
 ])
 
-# ========================
-# LOGIC – TÍNH RỦI RO
-# ========================
-if st.button("Dự đoán"):
+over_weight = st.selectbox("Bạn có cảm thấy cơ thể dư cân hay bụng mỡ không?", [
+    "Không",
+    "Có, hơi dư cân",
+    "Có, thừa cân rõ"
+])
+
+# ----------------------------------------
+# TÍNH ĐIỂM NGUY CƠ
+# ----------------------------------------
+if st.button("🔍 Dự đoán nguy cơ"):
+
     score = 0
 
     # tuổi
@@ -131,34 +93,40 @@ if st.button("Dự đoán"):
     if age >= 60: score += 3
 
     # vận động
-    if activity == "Hầu như không vận động": score += 2
-    elif activity == "Dưới 30 phút": score += 1
+    if activity == "Ít hoặc không vận động": score += 2
+    elif activity == "10–30 phút": score += 1
 
     # đồ ngọt
-    if sweet == "Mỗi ngày": score += 2
-    elif sweet == "3–6 lần/tuần": score += 1
+    if sweet_drink == "Mỗi ngày": score += 2
+    elif sweet_drink == "3–6 lần/tuần": score += 1
 
     # gia đình
     if family == "Có": score += 3
+
+    # triệu chứng
+    score += len(symptoms)
 
     # vòng bụng
     if belly == "Hơi to": score += 1
     elif belly == "To rõ": score += 2
 
-    score += len(symptoms)
+    # cảm giác dư cân
+    if over_weight == "Có, hơi dư cân": score += 1
+    elif over_weight == "Có, thừa cân rõ": score += 2
 
-    risk = min(score * 7, 100)
+    # chuyển điểm sang %
+    risk_pct = min(score * 6, 100)
 
-    st.markdown("## Kết quả phân tích:")
-    st.progress(risk / 100)
-    st.write(f"### Nguy cơ ước tính: **{risk:.1f}%**")
+    st.markdown("### ✅ Kết quả dự đoán:")
+    st.progress(risk_pct / 100)
+    st.success(f"Nguy cơ mắc đái tháo đường: **{risk_pct:.1f}%**")
 
-    if risk >= 70:
-        st.error("Nguy cơ cao — hãy đến bệnh viện để xét nghiệm chính xác.")
-    elif risk >= 40:
-        st.warning("Nguy cơ trung bình — nên tập thể dục và hạn chế đồ ngọt.")
+    if risk_pct >= 70:
+        st.error("🚨 Nguy cơ cao – bạn nên đi khám và xét nghiệm HbA1c.")
+    elif risk_pct >= 40:
+        st.warning("⚠ Nguy cơ trung bình – nên kiểm soát cân nặng, vận động, ăn uống.")
     else:
-        st.success("Nguy cơ thấp — giữ lối sống hiện tại!")
+        st.info("✅ Nguy cơ thấp – hãy giữ lối sống lành mạnh.")
 
-st.markdown("<hr>", unsafe_allow_html=True)
-st.caption("Công cụ mô phỏng — không thay thế chẩn đoán y tế. Hãy khám bác sĩ nếu có triệu chứng bất thường.")
+st.markdown("---")
+st.caption("🩺 Công cụ chỉ mang tính tham khảo — không thay thế bác sĩ.")
