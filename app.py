@@ -14,25 +14,67 @@ def set_background(img_path):
     with open(img_path, "rb") as f:
         data = f.read()
     b64 = base64.b64encode(data).decode()
+
     css = f"""
     <style>
+    /* NỀN - tối ưu cho PC và ĐIỆN THOẠI */
     [data-testid="stAppViewContainer"] {{
         background-image: url("data:image/jpg;base64,{b64}");
-        background-size: cover;
-        background-position: center;
+        background-size: contain;        
         background-repeat: no-repeat;
-        background-attachment: fixed;
+        background-position: center top;
+        background-attachment: scroll;
+        background-color: #000;  
     }}
+
+    /* HỘP NỘI DUNG */
     div.block-container {{
-        background: rgba(255, 255, 255, 0.85);
-        border-radius: 20px;
-        padding: 2rem;
-        box-shadow: 0 4px 25px rgba(0,0,0,0.15);
-        color: #222;
+        background: rgba(0, 0, 0, 0.55);
+        border-radius: 18px;
+        padding: 1.2rem;
+        max-width: 500px;
+        margin: auto;
+        color: #fff;
+        backdrop-filter: blur(6px);
+        box-shadow: 0 0 20px rgba(170, 200, 255, 0.35);
     }}
+
+    /* TIÊU ĐỀ */
     h1, h2, h3 {{
-        color: #e63946;
+        color: #c7d9ff;
         text-align: center;
+        text-shadow: 0px 0px 10px #6fb5ff;
+    }}
+
+    /* NÚT */
+    .stButton>button {{
+        background: linear-gradient(90deg, #6fb5ff, #b88cff);
+        border-radius: 10px;
+        border: none;
+        color: #000;
+        width: 100%;
+        padding: 0.7rem;
+        font-weight: bold;
+        transition: 0.2s;
+    }}
+
+    .stButton>button:hover {{
+        transform: scale(1.05);
+        box-shadow: 0 0 10px #b88cff;
+    }}
+
+    /* PROGRESS BAR */
+    .stProgress > div > div > div > div {{
+        background: linear-gradient(90deg, #6fb5ff, #b88cff);
+    }}
+
+    /* Tối ưu MOBILE */
+    @media (max-width: 600px) {{
+        div.block-container {{
+            width: 92%;
+            padding: 1rem;
+            margin-top: 15px;
+        }}
     }}
     </style>
     """
@@ -41,21 +83,21 @@ def set_background(img_path):
 set_background(BACKGROUND_IMAGE_PATH)
 
 st.title("DỰ ĐOÁN NGUY CƠ MẮC TIỂU ĐƯỜNG")
-st.markdown("Chỉ cần trả lời một số câu hỏi đơn giản")
+st.markdown("Chỉ cần trả lời một số câu hỏi đơn giản:")
 
-# ----------------------------------------
-# CÂU HỎI – TỰ KHAI
-# ----------------------------------------
+# =========================
+# CÂU HỎI
+# =========================
 age = st.number_input("Tuổi của bạn:", min_value=1, max_value=120, step=1)
 
-activity = st.selectbox("Bạn vận động bao lâu mỗi ngày?", [
+activity = st.selectbox("Mỗi ngày bạn vận động:", [
     "Ít hoặc không vận động",
     "10–30 phút",
     "30–60 phút",
     "Trên 1 giờ"
 ])
 
-sweet_drink = st.selectbox("Bạn uống nước ngọt/đồ uống có đường?", [
+sweet_drink = st.selectbox("Tần suất uống nước ngọt / đồ uống có đường:", [
     "Hầu như không",
     "1–2 lần/tuần",
     "3–6 lần/tuần",
@@ -65,26 +107,26 @@ sweet_drink = st.selectbox("Bạn uống nước ngọt/đồ uống có đườ
 family = st.selectbox("Gia đình có người mắc đái tháo đường?", ["Không", "Có"])
 
 symptoms = st.multiselect(
-    "Bạn có các triệu chứng sau không?",
+    "Bạn có triệu chứng nào sau đây?",
     ["Khát nước nhiều", "Đi tiểu nhiều", "Giảm cân nhanh", "Mệt mỏi", "Nhìn mờ"]
 )
 
-belly = st.selectbox("Vòng bụng của bạn như thế nào?", [
+belly = st.selectbox("Vòng bụng của bạn:", [
     "Bình thường",
     "Hơi to",
     "To rõ",
 ])
 
-over_weight = st.selectbox("Bạn có cảm thấy cơ thể dư cân hay bụng mỡ không?", [
+over_weight = st.selectbox("Bạn có bị dư cân / mỡ bụng không?", [
     "Không",
     "Có, hơi dư cân",
     "Có, thừa cân rõ"
 ])
 
-# ----------------------------------------
-# TÍNH ĐIỂM NGUY CƠ
-# ----------------------------------------
-if st.button("Dự đoán nguy cơ"):
+# =========================
+# TÍNH NGUY CƠ
+# =========================
+if st.button("🔍 Dự đoán nguy cơ"):
 
     score = 0
 
@@ -114,7 +156,6 @@ if st.button("Dự đoán nguy cơ"):
     if over_weight == "Có, hơi dư cân": score += 1
     elif over_weight == "Có, thừa cân rõ": score += 2
 
-    # chuyển điểm sang %
     risk_pct = min(score * 6, 100)
 
     st.markdown("### ✅ Kết quả dự đoán:")
@@ -129,4 +170,4 @@ if st.button("Dự đoán nguy cơ"):
         st.info("✅ Nguy cơ thấp – hãy giữ lối sống lành mạnh.")
 
 st.markdown("---")
-st.caption("Công cụ chỉ mang tính tham khảo — không thay thế bác sĩ.")
+st.caption("Công cụ chỉ mang tính tham khảo — không thay thế chẩn đoán của bác sĩ.")
