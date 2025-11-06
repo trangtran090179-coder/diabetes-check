@@ -40,7 +40,7 @@ def set_background(img_path):
 
 set_background(BACKGROUND_IMAGE_PATH)
 
-st.title("DỰ ĐOÁN NGUY CƠ MẮC TIỂU ĐƯỜNG (KHÔNG CẦN MÁY ĐO)")
+st.title("DỰ ĐOÁN NGUY CƠ MẮC TIỂU ĐƯỜNG")
 st.markdown("Chỉ cần trả lời một số câu hỏi đơn giản — không xét nghiệm, không thiết bị.")
 
 # ----------------------------------------
