@@ -124,9 +124,9 @@ if st.button("🔍 Dự đoán nguy cơ"):
     if risk_pct >= 70:
         st.error("🚨 Nguy cơ cao – bạn nên đi khám và xét nghiệm HbA1c.")
     elif risk_pct >= 40:
-        st.warning("⚠ Nguy cơ trung bình – nên kiểm soát cân nặng, vận động, ăn uống.")
+        st.warning("Nguy cơ trung bình – nên kiểm soát cân nặng, vận động, ăn uống.")
     else:
         st.info("✅ Nguy cơ thấp – hãy giữ lối sống lành mạnh.")
 
 st.markdown("---")
-st.caption("🩺 Công cụ chỉ mang tính tham khảo — không thay thế bác sĩ.")
+st.caption("Công cụ chỉ mang tính tham khảo — không thay thế bác sĩ.")
