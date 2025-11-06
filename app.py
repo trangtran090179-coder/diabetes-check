@@ -88,7 +88,7 @@ mode = st.selectbox("Chọn chế độ:", ["Tại nhà", "Chế độ máy"])
 st.markdown("---")
 
 
-# ========== CHẾ ĐỘ TẠI NHÀ ==========
+# ========== TẠI NHÀ ==========
 def home_mode():
     age = st.number_input("Tuổi:", 1, 120, 1)
     activity = st.selectbox("Bạn vận động bao lâu mỗi ngày?", [
@@ -122,8 +122,22 @@ def home_mode():
         risk = min(score * 6, 100)
 
         st.markdown("### Kết quả:")
-        st.progress(risk/100)
+
+        # ✅ Animation progress bar
+        bar = st.progress(0)
+        for i in range(0, int(risk)+1):
+            bar.progress(i/100)
+            time.sleep(0.010)
+
         st.write(f"Nguy cơ mắc đái tháo đường: **{risk:.1f}%**")
+
+        # ✅ Cảnh báo giống chế độ máy
+        if risk >= 70:
+            st.error("Nguy cơ cao – nên đi khám và xét nghiệm HbA1c.")
+        elif risk >= 40:
+            st.warning("Nguy cơ trung bình – nên kiểm soát cân nặng, vận động, ăn uống.")
+        else:
+            st.info("Nguy cơ thấp – hãy giữ lối sống lành mạnh.")
 
 
 # ========== CHẾ ĐỘ MÁY ==========
@@ -152,7 +166,10 @@ def hospital_mode():
         X = df.drop(columns=["Outcome"])
         y = df["Outcome"]
 
+        from sklearn.model_selection import train_test_split
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+        from sklearn.linear_model import LogisticRegression
         model = LogisticRegression(max_iter=1000, solver='liblinear')
         model.fit(X_train, y_train)
 
@@ -162,7 +179,6 @@ def hospital_mode():
 
         st.markdown("### Kết quả:")
 
-        # ✅ Animation progress bar
         bar = st.progress(0)
         for i in range(0, int(risk_percent)+1):
             bar.progress(i/100)
@@ -170,7 +186,6 @@ def hospital_mode():
 
         st.write(f"Xác suất mắc bệnh: **{risk_percent:.1f}%**")
 
-     
         if risk_percent >= 70:
             st.error("Nguy cơ cao – nên đi khám và xét nghiệm HbA1c.")
         elif risk_percent >= 40:
