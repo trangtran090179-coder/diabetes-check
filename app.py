@@ -14,6 +14,7 @@ def set_background(img_path):
     with open(img_path, "rb") as f:
         data = f.read()
     b64 = base64.b64encode(data).decode()
+    
     css = f"""
     <style>
 
@@ -41,12 +42,12 @@ def set_background(img_path):
         text-align: center;
     }}
 
-    /* ✅ ĐỔI MÀU CHỮ CÂU HỎI (INPUT, LABEL, SELECT...) */
-    label, div[data-testid="stMarkdownContainer"], .stSelectbox, .stNumberInput, .stMultiSelect {
+    /* ✅ đổi màu toàn bộ label - không bị chìm nền */
+    label, div[data-testid="stMarkdownContainer"], .stSelectbox, .stNumberInput, .stMultiSelect {{
         color: #ffffff !important;
         font-weight: 500;
         text-shadow: 0 0 6px rgba(255,255,255,0.4);
-    }
+    }}
 
     .stButton>button {{
         background: linear-gradient(90deg, #6fb5ff, #b88cff);
@@ -76,8 +77,10 @@ def set_background(img_path):
 
     </style>
     """
+
     st.markdown(css, unsafe_allow_html=True)
 
+# ✅ gọi hàm sau khi định nghĩa xong
 set_background(BACKGROUND_IMAGE_PATH)
 
 st.title("DỰ ĐOÁN NGUY CƠ MẮC TIỂU ĐƯỜNG")
@@ -119,6 +122,7 @@ over_weight = st.selectbox("Bạn có cảm thấy cơ thể dư cân hay bụng
 ])
 
 if st.button("Dự đoán nguy cơ"):
+
     score = 0
 
     if age >= 45: score += 2
