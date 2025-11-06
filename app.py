@@ -9,7 +9,7 @@ import requests
 # ========================
 st.set_page_config(
     page_title="Diabetes Risk System",
-    page_icon="⭐",
+    page_icon="",
     layout="centered"
 )
 
@@ -60,7 +60,7 @@ def set_background(img_url):
     """
     st.markdown(bg, unsafe_allow_html=True)
 
-set_background("https://i.imgur.com/RD6u7FW.jpeg")
+set_background("https://wallpapersden.com/star-rail-4k-firefly-honkai-2024-art-wallpaper/")
 
 # ========================
 # LOTTIE ANIMATION
@@ -84,7 +84,7 @@ if lottie:
 st.markdown(
     """
     <div style='text-align:center; font-size:18px'>
-     không cần xét nghiệm hay máy đo.<br>
+    <br>
     Trả lời vài câu hỏi, hệ thống sẽ tính nguy cơ sức khỏe của bạn.
     </div>
     """,
@@ -123,7 +123,7 @@ belly = st.selectbox("➤ Tình trạng vòng bụng:", [
 # ========================
 # LOGIC – TÍNH RỦI RO
 # ========================
-if st.button("🔮 Dự đoán"):
+if st.button("Dự đoán"):
     score = 0
 
     # tuổi
@@ -156,7 +156,7 @@ if st.button("🔮 Dự đoán"):
     if risk >= 70:
         st.error("Nguy cơ cao — hãy đến bệnh viện để xét nghiệm chính xác.")
     elif risk >= 40:
-        st.warning("⚠ Nguy cơ trung bình — nên tập thể dục và hạn chế đồ ngọt.")
+        st.warning("Nguy cơ trung bình — nên tập thể dục và hạn chế đồ ngọt.")
     else:
         st.success("Nguy cơ thấp — giữ lối sống hiện tại!")
 
