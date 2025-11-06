@@ -16,32 +16,66 @@ def set_background(img_path):
     b64 = base64.b64encode(data).decode()
     css = f"""
     <style>
+
+    /* NỀN */
     [data-testid="stAppViewContainer"] {{
         background-image: url("data:image/jpg;base64,{b64}");
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
         background-attachment: fixed;
+        animation: fadeIn 1.2s ease-in-out;
     }}
+
+    /* HỘP NỘI DUNG TRONG TRONG SUỐT + ANIMATION */
     div.block-container {{
-        background: rgba(255, 255, 255, 0.85);
-        border-radius: 20px;
+        background: rgba(0, 0, 0, 0.55);
+        border-radius: 18px;
         padding: 2rem;
-        box-shadow: 0 4px 25px rgba(0,0,0,0.15);
-        color: #222;
+        box-shadow: 0 0 20px rgba(170, 200, 255, 0.35);
+        color: #ffffff;
+        animation: slideUp 0.8s ease-out;
     }}
+
+    /* CHỮ KHÔNG BỊ TRÙNG MÀU */
     h1, h2, h3 {{
-        color: #e63946;
+        color: #d7e3ff;
+        text-shadow: 0 0 8px #75aaff;
         text-align: center;
     }}
+
+    /* TỐI ƯU NÚT */
+    .stButton>button {{
+        background: linear-gradient(90deg, #6fb5ff, #b88cff);
+        border-radius: 10px;
+        border: none;
+        color: black;
+        width: 100%;
+        padding: 0.6rem;
+        font-weight: bold;
+        transition: 0.25s;
+    }}
+
+    .stButton>button:hover {{
+        transform: scale(1.05);
+        box-shadow: 0 0 12px #b88cff;
+    }}
+
+    /* ANIMATION CSS */
+    @keyframes fadeIn {{
+        0% {{opacity: 0;}}
+        100% {{opacity: 1;}}
+    }}
+
+    @keyframes slideUp {{
+        0% {{transform: translateY(25px); opacity: 0;}}
+        100% {{transform: translateY(0); opacity: 1;}}
+    }}
+
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
 
-set_background(BACKGROUND_IMAGE_PATH)
-
-st.title("DỰ ĐOÁN NGUY CƠ MẮC TIỂU ĐƯỜNG")
-st.markdown("Chỉ cần trả lời một số câu hỏi đơn giản")
 
 # ----------------------------------------
 # CÂU HỎI – TỰ KHAI
