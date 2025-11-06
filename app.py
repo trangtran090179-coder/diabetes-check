@@ -27,7 +27,7 @@ def set_background(img_path):
         animation: fadeIn 1.2s ease-in-out;
     }}
 
-    /* HỘP NỘI DUNG TRONG TRONG SUỐT + ANIMATION */
+    /* HỘP NỘI DUNG */
     div.block-container {{
         background: rgba(0, 0, 0, 0.55);
         border-radius: 18px;
@@ -37,14 +37,14 @@ def set_background(img_path):
         animation: slideUp 0.8s ease-out;
     }}
 
-    /* CHỮ KHÔNG BỊ TRÙNG MÀU */
+    /* CHỮ */
     h1, h2, h3 {{
         color: #d7e3ff;
         text-shadow: 0 0 8px #75aaff;
         text-align: center;
     }}
 
-    /* TỐI ƯU NÚT */
+    /* NÚT */
     .stButton>button {{
         background: linear-gradient(90deg, #6fb5ff, #b88cff);
         border-radius: 10px;
@@ -61,7 +61,7 @@ def set_background(img_path):
         box-shadow: 0 0 12px #b88cff;
     }}
 
-    /* ANIMATION CSS */
+    /* ANIMATION */
     @keyframes fadeIn {{
         0% {{opacity: 0;}}
         100% {{opacity: 1;}}
@@ -76,10 +76,12 @@ def set_background(img_path):
     """
     st.markdown(css, unsafe_allow_html=True)
 
+# ✅ GỌI HÀM BACKGROUND
+set_background(BACKGROUND_IMAGE_PATH)
 
-# ----------------------------------------
-# CÂU HỎI – TỰ KHAI
-# ----------------------------------------
+st.title("DỰ ĐOÁN NGUY CƠ MẮC TIỂU ĐƯỜNG")
+st.markdown("Chỉ cần trả lời một số câu hỏi đơn giản")
+
 age = st.number_input("Tuổi của bạn:", min_value=1, max_value=120, step=1)
 
 activity = st.selectbox("Bạn vận động bao lâu mỗi ngày?", [
@@ -115,40 +117,29 @@ over_weight = st.selectbox("Bạn có cảm thấy cơ thể dư cân hay bụng
     "Có, thừa cân rõ"
 ])
 
-# ----------------------------------------
-# TÍNH ĐIỂM NGUY CƠ
-# ----------------------------------------
 if st.button("Dự đoán nguy cơ"):
 
     score = 0
 
-    # tuổi
     if age >= 45: score += 2
     if age >= 60: score += 3
 
-    # vận động
     if activity == "Ít hoặc không vận động": score += 2
     elif activity == "10–30 phút": score += 1
 
-    # đồ ngọt
     if sweet_drink == "Mỗi ngày": score += 2
     elif sweet_drink == "3–6 lần/tuần": score += 1
 
-    # gia đình
     if family == "Có": score += 3
 
-    # triệu chứng
     score += len(symptoms)
 
-    # vòng bụng
     if belly == "Hơi to": score += 1
     elif belly == "To rõ": score += 2
 
-    # cảm giác dư cân
     if over_weight == "Có, hơi dư cân": score += 1
     elif over_weight == "Có, thừa cân rõ": score += 2
 
-    # chuyển điểm sang %
     risk_pct = min(score * 6, 100)
 
     st.markdown("### ✅ Kết quả dự đoán:")
