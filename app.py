@@ -1,6 +1,7 @@
 import streamlit as st
 import numpy as np
 import base64
+import time
 
 st.set_page_config(
     page_title="Diabetes Risk Checker",
@@ -130,7 +131,6 @@ def hospital_mode():
     import pandas as pd
     from sklearn.model_selection import train_test_split
     from sklearn.linear_model import LogisticRegression
-    from sklearn.metrics import accuracy_score
 
     pregnancies = st.number_input("Số lần mang thai (nếu không có để 0):", 0, 50, 0)
     glucose = st.number_input("Glucose (mg/dL):", 0.0, 500.0, 0.0)
@@ -143,8 +143,7 @@ def hospital_mode():
         cols = ["Pregnancies","Glucose","BloodPressure","SkinThickness","Insulin","BMI","DiabetesPedigree","Age","Outcome"]
 
         df = pd.read_csv(url, header=None, names=cols)
-
-        df = df.drop(columns=["SkinThickness","Insulin","DiabetesPedigree"])  # ✅ Bỏ hết cái không cần
+        df = df.drop(columns=["SkinThickness","Insulin","DiabetesPedigree"])
 
         for c in ["Glucose","BloodPressure","BMI"]:
             df[c] = df[c].replace(0, np.nan)
@@ -159,11 +158,25 @@ def hospital_mode():
 
         x_input = np.array([pregnancies, glucose, bp, bmi, age]).reshape(1, -1)
         proba = model.predict_proba(x_input)[0,1]
-        pred = int(model.predict(x_input)[0])
+        risk_percent = proba * 100
 
         st.markdown("### Kết quả:")
-        st.progress(proba)
-        st.write(f"Xác suất mắc bệnh: **{proba*100:.1f}%**")
+
+        # ✅ Animation progress bar
+        bar = st.progress(0)
+        for i in range(0, int(risk_percent)+1):
+            bar.progress(i/100)
+            time.sleep(0.010)
+
+        st.write(f"Xác suất mắc bệnh: **{risk_percent:.1f}%**")
+
+     
+        if risk_percent >= 70:
+            st.error("Nguy cơ cao – nên đi khám và xét nghiệm HbA1c.")
+        elif risk_percent >= 40:
+            st.warning("Nguy cơ trung bình – nên kiểm soát cân nặng, vận động, ăn uống.")
+        else:
+            st.info("Nguy cơ thấp – hãy giữ lối sống lành mạnh.")
 
 
 # ========== RUN UI ==========
