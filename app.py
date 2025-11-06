@@ -60,7 +60,7 @@ def set_background(img_url):
     """
     st.markdown(bg, unsafe_allow_html=True)
 
-set_background("https://wallpapersden.com/star-rail-4k-firefly-honkai-2024-art-wallpaper/")
+set_background("castorice-honkai-7680x4320-22114.jpg")
 
 # ========================
 # LOTTIE ANIMATION
@@ -149,7 +149,7 @@ if st.button("Dự đoán"):
 
     risk = min(score * 7, 100)
 
-    st.markdown("## ⭐ Kết quả phân tích:")
+    st.markdown("## Kết quả phân tích:")
     st.progress(risk / 100)
     st.write(f"### Nguy cơ ước tính: **{risk:.1f}%**")
 
