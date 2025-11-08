@@ -1,217 +1,204 @@
 import streamlit as st
-import base64
 import numpy as np
+import base64
+import time
 
 st.set_page_config(
     page_title="Diabetes Risk Checker",
-    layout="wide",
+    layout="centered",
     initial_sidebar_state="collapsed"
 )
 
 BACKGROUND_IMAGE_PATH = "castorice-honkai-7680x4320-22114.jpg"
 
-def inject_css():
-    with open(BACKGROUND_IMAGE_PATH, "rb") as f:
-        img_data = f.read()
-    b64 = base64.b64encode(img_data).decode()
+def set_background(img_path):
+    try:
+        with open(img_path, "rb") as f:
+            data = f.read()
+        b64 = base64.b64encode(data).decode()
+    except:
+        b64 = ""
 
-    css = """
+    css = f"""
     <style>
-
-    [data-testid="stAppViewContainer"] {
-        background-image: url("data:image/png;base64,%s");
+    [data-testid="stAppViewContainer"] {{
+        {"background-image: url('data:image/jpg;base64,"+b64+"');" if b64 else ""}
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
         background-attachment: fixed;
-        animation: fadeIn 1.2s ease-in-out;
-    }
+        animation: fadeIn 1s ease-in-out;
+        background-color: #000;
+    }}
 
-    .top-nav {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        gap: 50px;
-        padding: 18px;
-        backdrop-filter: blur(6px);
-    }
-
-    .nav-btn {
-        padding: 10px 20px;
-        border-radius: 10px;
-        cursor: pointer;
-        font-weight: bold;
-        text-transform: uppercase;
-        background: rgba(255,255,255,0.15);
-        color: white;
-        transition: 0.3s;
-        text-decoration:none;
-    }
-
-    .nav-btn:hover {
-        background: rgba(255,255,255,0.35);
-        transform: scale(1.05);
-    }
-
-    .main-title {
-        margin-top: 130px;
-        text-align: center;
-        font-size: 45px;
-        color: #ffffff;
-        text-shadow: 0 0 12px #75aaff;
-        animation: fadeUp 1.3s ease;
-    }
-
-    .sub-title {
-        text-align: center;
-        font-size: 20px;
-        color: #d6e9ff;
-        margin-top: -10px;
-    }
-
-    .center-btn {
-        display: flex;
-        justify-content: center;
-        margin-top: 40px;
-    }
-
-    .cta-btn {
-        background: linear-gradient(90deg, #6fb5ff, #b88cff);
-        border: none;
-        padding: 14px 28px;
-        font-size: 20px;
-        border-radius: 12px;
-        font-weight: bold;
-        transition: 0.28s;
-        cursor: pointer;
-        color: black;
-    }
-
-    .cta-btn:hover {
-        transform: scale(1.08);
-        box-shadow: 0 0 15px #b88cff;
-    }
-
-    .form-box {
-        background: rgba(0,0,0,0.55);
-        padding: 25px;
+    div.block-container {{
+        background: rgba(0, 0, 0, 0.55);
         border-radius: 18px;
-        box-shadow: 0 0 22px rgba(170,200,255,0.38);
-        animation: fadeUp 0.6s ease;
-    }
+        padding: 1.6rem;
+        box-shadow: 0 0 20px rgba(170, 200, 255, 0.28);
+        color: #ffffff;
+        animation: slideUp 0.6s ease-out;
+        max-width: 900px;
+        margin: auto;
+    }}
 
-    .form-title {
-        text-align: center;
-        font-size: 30px;
+    h1, h2, h3 {{
         color: #d7e3ff;
-        text-shadow: 0 0 10px #75aaff;
-        margin-bottom: 10px;
-    }
+        text-shadow: 0 0 8px #75aaff;
+        text-align: center;
+    }}
 
-    @keyframes fadeIn {
-        0% {opacity:0;}
-        100% {opacity:1;}
-    }
+    label {{
+        color: white !important;
+    }}
 
-    @keyframes fadeUp {
-        0% {opacity:0; transform: translateY(25px);}
-        100% {opacity:1; transform: translateY(0);}
-    }
+    .stButton>button {{
+        background: linear-gradient(90deg, #6fb5ff, #b88cff);
+        border-radius: 10px;
+        border: none;
+        color: black;
+        width: 100%;
+        padding: 0.6rem;
+        font-weight: bold;
+        transition: 0.18s;
+    }}
 
+    .stButton>button:hover {{
+        transform: scale(1.05);
+        box-shadow: 0 0 12px #b88cff;
+    }}
+
+    @keyframes fadeIn {{
+        0% {{opacity: 0;}}
+        100% {{opacity: 1;}}
+    }}
+    @keyframes slideUp {{
+        0% {{transform: translateY(18px); opacity: 0;}}
+        100% {{transform: translateY(0); opacity: 1;}}
+    }}
     </style>
-    """ % (b64)
-
+    """
     st.markdown(css, unsafe_allow_html=True)
 
-inject_css()
+set_background(BACKGROUND_IMAGE_PATH)
 
-# ============================= UI =============================
-st.markdown("""
-<div class='top-nav'>
-    <div class='nav-btn'>HOME</div>
-    <div class='nav-btn'>INFO</div>
-    <div class='nav-btn'>CONTACT</div>
-</div>
-""", unsafe_allow_html=True)
+st.title("DỰ ĐOÁN NGUY CƠ MẮC ĐÁI THÁO ĐƯỜNG")
 
-st.markdown("<div class='main-title'>Dự đoán nguy cơ tiểu đường ngay tại nhà</div>", unsafe_allow_html=True)
-st.markdown("<div class='sub-title'>Không cần xét nghiệm. Kết quả tham khảo theo nguy cơ sức khỏe.</div>", unsafe_allow_html=True)
+mode = st.selectbox("Chọn chế độ:", ["Tại nhà", "Chế độ máy"])
+st.markdown("---")
 
-start = st.button("🚀 BẮT ĐẦU DỰ ĐOÁN")
 
-if not start:
-    st.stop()
+# ========== TẠI NHÀ ==========
+def home_mode():
+    age = st.number_input("Tuổi:", 1, 120, 1)
+    activity = st.selectbox("Bạn vận động bao lâu mỗi ngày?", [
+        "Ít hoặc không vận động", "10–30 phút", "30–60 phút", "Trên 1 giờ"
+    ])
+    sweet = st.selectbox("Bạn uống nước ngọt/đồ uống có đường?", [
+        "Hầu như không","1–2 lần/tuần","3–6 lần/tuần","Mỗi ngày"
+    ])
+    family = st.selectbox("Gia đình có người mắc đái tháo đường?", ["Không","Có"])
+    symptoms = st.multiselect("Bạn có các triệu chứng sau không?", [
+        "Khát nước nhiều","Đi tiểu nhiều","Giảm cân nhanh","Mệt mỏi","Nhìn mờ"
+    ])
+    belly = st.selectbox("Vòng bụng:", ["Bình thường","Hơi to","To rõ"])
+    over = st.selectbox("Cảm giác dư cân:", ["Không","Có, hơi dư cân","Có, thừa cân rõ"])
 
-st.markdown("<div class='form-box'>", unsafe_allow_html=True)
+    if st.button("Dự đoán"):
+        score = 0
+        if age >= 45: score += 2
+        if age >= 60: score += 3
+        if activity == "Ít hoặc không vận động": score += 2
+        elif activity == "10–30 phút": score += 1
+        if sweet == "Mỗi ngày": score += 2
+        elif sweet == "3–6 lần/tuần": score += 1
+        if family == "Có": score += 3
+        score += len(symptoms)
+        if belly == "Hơi to": score += 1
+        elif belly == "To rõ": score += 2
+        if over == "Có, hơi dư cân": score += 1
+        elif over == "Có, thừa cân rõ": score += 2
 
-mode = st.radio("Chọn chế độ:", ["Tại nhà", "Máy"], horizontal=True)
+        risk = min(score * 6, 100)
 
-age = st.number_input("Tuổi:", min_value=1, max_value=120, step=1)
+        st.markdown("### Kết quả:")
 
-activity = st.selectbox("Bạn vận động bao lâu mỗi ngày?", [
-    "Ít hoặc không vận động", "10–30 phút", "30–60 phút", "Trên 1 giờ"
-])
+        # ✅ Animation progress bar
+        bar = st.progress(0)
+        for i in range(0, int(risk)+1):
+            bar.progress(i/100)
+            time.sleep(0.010)
 
-sweet = st.selectbox("Bạn uống nước ngọt/đồ có đường?", [
-    "Hầu như không", "1–2 lần/tuần", "3–6 lần/tuần", "Mỗi ngày"
-])
+        st.write(f"Nguy cơ mắc đái tháo đường: **{risk:.1f}%**")
 
-symptoms = st.multiselect("Triệu chứng:", [
-    "Khát nước", "Đi tiểu nhiều", "Giảm cân", "Mệt mỏi", "Nhìn mờ"
-])
+        # ✅ Cảnh báo giống chế độ máy
+        if risk >= 70:
+            st.error("Nguy cơ cao – nên đi khám và xét nghiệm HbA1c.")
+        elif risk >= 40:
+            st.warning("Nguy cơ trung bình – nên kiểm soát cân nặng, vận động, ăn uống.")
+        else:
+            st.info("Nguy cơ thấp – hãy giữ lối sống lành mạnh.")
 
-weight = st.selectbox("Thừa cân?", [
-    "Không", "Có, hơi thừa", "Có, thừa nhiều"
-])
 
-waist = st.selectbox("Vòng bụng:", [
-    "Bình thường", "Hơi to", "To rõ"
-])
+# ========== CHẾ ĐỘ MÁY ==========
+def hospital_mode():
+    import pandas as pd
+    from sklearn.model_selection import train_test_split
+    from sklearn.linear_model import LogisticRegression
 
-if mode == "Máy":
-    bmi = st.number_input("BMI:", 10.0, 60.0, step=0.1)
-    glucose = st.number_input("Đường huyết lúc đói (mg/dL):", 50, 300, step=1)
+    pregnancies = st.number_input("Số lần mang thai (nếu không có để 0):", 0, 50, 0)
+    glucose = st.number_input("Glucose (mg/dL):", 0.0, 500.0, 0.0)
+    bp = st.number_input("Huyết áp tâm trương (mmHg):", 0.0, 200.0, 0.0)
+    bmi = st.number_input("BMI (kg/m²):", 0.0, 80.0, 0.0)
+    age = st.number_input("Tuổi:", 1, 120, 1)
 
-st.markdown("</div>", unsafe_allow_html=True)
+    if st.button("Dự đoán"):
+        url = "https://raw.githubusercontent.com/jbrownlee/Datasets/master/pima-indians-diabetes.data.csv"
+        cols = ["Pregnancies","Glucose","BloodPressure","SkinThickness","Insulin","BMI","DiabetesPedigree","Age","Outcome"]
 
-if st.button("✅ TÍNH NGUY CƠ"):
+        df = pd.read_csv(url, header=None, names=cols)
+        df = df.drop(columns=["SkinThickness","Insulin","DiabetesPedigree"])
 
-    score = 0
+        for c in ["Glucose","BloodPressure","BMI"]:
+            df[c] = df[c].replace(0, np.nan)
+            df[c] = df[c].fillna(df[c].median())
 
-    if age >= 45: score += 2
-    if age >= 60: score += 3
+        X = df.drop(columns=["Outcome"])
+        y = df["Outcome"]
 
-    if activity == "Ít hoặc không vận động": score += 2
-    elif activity == "10–30 phút": score += 1
+        from sklearn.model_selection import train_test_split
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    if sweet == "Mỗi ngày": score += 2
-    elif sweet == "3–6 lần/tuần": score += 1
+        from sklearn.linear_model import LogisticRegression
+        model = LogisticRegression(max_iter=1000, solver='liblinear')
+        model.fit(X_train, y_train)
 
-    score += len(symptoms)
+        x_input = np.array([pregnancies, glucose, bp, bmi, age]).reshape(1, -1)
+        proba = model.predict_proba(x_input)[0,1]
+        risk_percent = proba * 100
 
-    if weight == "Có, hơi thừa": score += 1
-    elif weight == "Có, thừa nhiều": score += 2
+        st.markdown("### Kết quả:")
 
-    if waist == "Hơi to": score += 1
-    elif waist == "To rõ": score += 2
+        bar = st.progress(0)
+        for i in range(0, int(risk_percent)+1):
+            bar.progress(i/100)
+            time.sleep(0.010)
 
-    if mode == "Máy":
-        if bmi > 25: score += 2
-        if glucose > 126: score += 3
-        elif glucose > 100: score += 1
+        st.write(f"Xác suất mắc bệnh: **{risk_percent:.1f}%**")
 
-    risk_pct = min(score * 6, 100)
+        if risk_percent >= 70:
+            st.error("Nguy cơ cao – nên đi khám và xét nghiệm HbA1c.")
+        elif risk_percent >= 40:
+            st.warning("Nguy cơ trung bình – nên kiểm soát cân nặng, vận động, ăn uống.")
+        else:
+            st.info("Nguy cơ thấp – hãy giữ lối sống lành mạnh.")
 
-    st.subheader("✅ Kết quả dự đoán")
-    st.progress(risk_pct / 100)
-    st.success(f"Nguy cơ mắc tiểu đường: **{risk_pct:.1f}%**")
 
-    if risk_pct >= 70:
-        st.error("🚨 Nguy cơ cao – nên đi khám.")
-    elif risk_pct >= 40:
-        st.warning("⚠ Nguy cơ trung bình – nên điều chỉnh lối sống.")
-    else:
-        st.info("✅ Nguy cơ thấp – tiếp tục duy trì sức khỏe.")
+# ========== RUN UI ==========
+if mode == "Tại nhà":
+    home_mode()
+else:
+    hospital_mode()
 
 st.markdown("---")
-st.caption("© Công cụ tham khảo, không thay thế bác sĩ.")
+st.caption("Công cụ tham khảo — không thay thế chẩn đoán y khoa.")
