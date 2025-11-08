@@ -9,7 +9,7 @@ from sklearn.linear_model import LogisticRegression
 # --- Cấu hình trang ---
 st.set_page_config(page_title="Diabetes Risk Checker", layout="wide")
 
-BACKGROUND_IMAGE_PATH = "c03faa27-cb90-41f2-aef9-e7e77d3fc0b3.png"
+BACKGROUND_IMAGE_PATH = "castorice-honkai-7680x4320-22114.jpg"
 
 # --- Đặt ảnh nền ---
 def set_background(img_path):
