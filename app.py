@@ -6,56 +6,93 @@ import time
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 
-# ========== Cấu hình trang ==========
-st.set_page_config(page_title="Diabetes Risk Checker", layout="centered")
+# --- Cấu hình trang ---
+st.set_page_config(page_title="Diabetes Risk Checker", layout="wide")
 
-BACKGROUND_IMAGE_PATH = "beca8a29-0598-416f-8e82-c213e51d39d8.png"
+BACKGROUND_IMAGE_PATH = "c03faa27-cb90-41f2-aef9-e7e77d3fc0b3.png"
 
+# --- Đặt ảnh nền ---
 def set_background(img_path):
-    try:
-        with open(img_path, "rb") as f:
-            data = f.read()
-        b64 = base64.b64encode(data).decode()
-    except:
-        b64 = ""
-
+    with open(img_path, "rb") as f:
+        data = f.read()
+    b64 = base64.b64encode(data).decode()
     css = f"""
     <style>
     [data-testid="stAppViewContainer"] {{
-        {"background-image: url('data:image/png;base64,"+b64+"');" if b64 else ""}
+        background-image: url("data:image/png;base64,{b64}");
         background-size: cover;
         background-position: center;
-        background-repeat: no-repeat;
         background-attachment: fixed;
-        background-color: #000;
+        background-repeat: no-repeat;
+        animation: fadeIn 1.2s ease-in-out;
     }}
     div.block-container {{
-        background: rgba(0, 0, 0, 0.55);
+        background: rgba(0, 0, 0, 0.5);
         border-radius: 18px;
-        padding: 1.6rem;
+        padding: 2rem;
         color: white;
-        box-shadow: 0 0 20px rgba(170, 200, 255, 0.28);
+        box-shadow: 0 0 20px rgba(170, 200, 255, 0.25);
         max-width: 900px;
-        margin: auto;
+        margin: 5rem auto;
+        animation: slideUp 0.6s ease-out;
     }}
     h1, h2, h3 {{
         color: #d7e3ff;
         text-shadow: 0 0 8px #75aaff;
         text-align: center;
     }}
-    .stButton>button {{
-        background: linear-gradient(90deg, #6fb5ff, #b88cff);
-        border-radius: 10px;
-        border: none;
-        color: black;
+    .topnav {{
+        background-color: rgba(0, 0, 0, 0.7);
+        overflow: hidden;
+        position: fixed;
+        top: 0;
         width: 100%;
-        padding: 0.6rem;
-        font-weight: bold;
-        transition: 0.18s;
+        z-index: 9999;
+        backdrop-filter: blur(6px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0.5rem 0;
     }}
-    .stButton>button:hover {{
-        transform: scale(1.05);
-        box-shadow: 0 0 12px #b88cff;
+    .topnav a {{
+        color: white;
+        text-align: center;
+        padding: 12px 20px;
+        text-decoration: none;
+        font-size: 18px;
+        font-weight: bold;
+        transition: 0.3s;
+    }}
+    .topnav a:hover {{
+        color: #75aaff;
+        text-shadow: 0 0 8px #75aaff;
+    }}
+    .floating-button {{
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: linear-gradient(90deg, #6fb5ff, #b88cff);
+        color: black;
+        border: none;
+        border-radius: 50px;
+        padding: 18px 26px;
+        font-weight: bold;
+        font-size: 16px;
+        cursor: pointer;
+        box-shadow: 0 0 20px rgba(100, 150, 255, 0.5);
+        transition: all 0.25s;
+    }}
+    .floating-button:hover {{
+        transform: scale(1.08);
+        box-shadow: 0 0 25px rgba(180, 140, 255, 0.8);
+    }}
+    @keyframes fadeIn {{
+        from {{ opacity: 0; }}
+        to {{ opacity: 1; }}
+    }}
+    @keyframes slideUp {{
+        from {{ transform: translateY(20px); opacity: 0; }}
+        to {{ transform: translateY(0); opacity: 1; }}
     }}
     </style>
     """
@@ -63,53 +100,64 @@ def set_background(img_path):
 
 set_background(BACKGROUND_IMAGE_PATH)
 
-# ========== Thanh menu ==========
-st.sidebar.title("🔷 Menu")
-menu = st.sidebar.radio("Điều hướng", ["🏠 Home", "ℹ️ Info", "📞 Contact", "🧮 Bắt đầu dự đoán"])
+# --- Thanh menu trên đầu ---
+st.markdown("""
+<div class="topnav">
+    <a href="?page=Home">Home</a>
+    <a href="?page=Info">Info</a>
+    <a href="?page=Contact">Contact</a>
+</div>
+""", unsafe_allow_html=True)
 
-# ========== Các trang ==========
-if menu == "🏠 Home":
+# --- Đọc URL params để xác định trang ---
+query_params = st.query_params
+page = query_params.get("page", ["Home"])[0]
+
+# --- Hiển thị nội dung ---
+if page == "Home":
     st.title("🩺 Diabetes Risk Checker")
     st.markdown("""
     ### 💡 Chào mừng bạn!
-    Đây là công cụ dự đoán **nguy cơ mắc đái tháo đường** bằng hai chế độ:
-    - 🏡 **Tại nhà:** dựa vào lối sống và triệu chứng.  
-    - 🏥 **Chế độ máy:** dựa vào dữ liệu y học thật từ bộ dữ liệu Pima Indians Diabetes.
-    
-    👉 Hãy chọn **"Bắt đầu dự đoán"** ở menu bên trái để thử ngay!
-    """)
-    st.image("https://cdn-icons-png.flaticon.com/512/2927/2927347.png", width=150)
+    Công cụ này giúp bạn **ước tính nguy cơ mắc bệnh đái tháo đường** qua hai chế độ:
+    - 🏡 *Tại nhà*: dựa trên thói quen sinh hoạt, triệu chứng.  
+    - 🏥 *Chế độ máy*: dựa trên dữ liệu y học (Pima Indians Diabetes Dataset).  
 
-elif menu == "ℹ️ Info":
+    👉 Nhấn nút **Bắt đầu dự đoán** ở góc phải để bắt đầu nhé!
+    """)
+elif page == "Info":
     st.title("ℹ️ Thông tin")
     st.markdown("""
-    **Ứng dụng này được xây dựng bằng Python & Streamlit**, với mục tiêu giúp người dùng:
-    - Nhận biết sớm nguy cơ mắc bệnh tiểu đường.
-    - Nâng cao ý thức chăm sóc sức khỏe cá nhân.
-    
-    Dữ liệu huấn luyện mô hình lấy từ bộ:
-    [Pima Indians Diabetes Dataset (UCI Machine Learning Repository)](https://archive.ics.uci.edu/ml/datasets/Pima+Indians+Diabetes)
-    
-    ⚠️ *Đây là công cụ hỗ trợ, không thay thế chẩn đoán y khoa.*
+    **Ứng dụng**: Diabetes Risk Checker  
+    **Ngôn ngữ**: Python + Streamlit  
+    **Dữ liệu huấn luyện**: [Pima Indians Diabetes Dataset (UCI)](https://archive.ics.uci.edu/ml/datasets/Pima+Indians+Diabetes)  
+    ⚠️ Đây là công cụ hỗ trợ — **không thay thế chẩn đoán y khoa**.
     """)
-
-elif menu == "📞 Contact":
+elif page == "Contact":
     st.title("📞 Liên hệ")
     st.markdown("""
-    **Tác giả:** Nhóm phát triển AI Y tế  
-    **Email:** healthai.project@gmail.com  
-    **Github:** [https://github.com/healthai-project](https://github.com/healthai-project)  
-    
-    💬 *Mọi góp ý, phản hồi đều được hoan nghênh!*
+    - **Tác giả:** Nhóm AI Y tế  
+    - **Email:** healthai.project@gmail.com  
+    - **GitHub:** [https://github.com/healthai-project](https://github.com/healthai-project)  
     """)
 
-elif menu == "🧮 Bắt đầu dự đoán":
-    st.title("DỰ ĐOÁN NGUY CƠ MẮC ĐÁI THÁO ĐƯỜNG")
+# --- Nếu người dùng nhấn nút “Bắt đầu dự đoán” ---
+if st.button("🔮 Bắt đầu dự đoán", key="floating", help="Nhấn để mở trình dự đoán"):
+    st.session_state["show_predict"] = True
 
+# --- Hiển thị nút nổi ---
+st.markdown("""
+<button class="floating-button" onclick="window.location.href='?page=Predict'">
+    🔮 Bắt đầu dự đoán
+</button>
+""", unsafe_allow_html=True)
+
+# --- Trang dự đoán ---
+if page == "Predict":
+    st.title("DỰ ĐOÁN NGUY CƠ MẮC ĐÁI THÁO ĐƯỜNG")
     mode = st.selectbox("Chọn chế độ:", ["Tại nhà", "Chế độ máy"])
     st.markdown("---")
 
-    # ========= CHẾ ĐỘ TẠI NHÀ =========
+    # ====== TẠI NHÀ ======
     if mode == "Tại nhà":
         age = st.number_input("Tuổi:", 1, 120, 25)
         activity = st.selectbox("Bạn vận động bao lâu mỗi ngày?", [
@@ -141,14 +189,12 @@ elif menu == "🧮 Bắt đầu dự đoán":
             elif over == "Có, thừa cân rõ": score += 2
 
             risk = min(score * 6, 100)
-
             bar = st.progress(0)
             for i in range(int(risk)+1):
                 bar.progress(i/100)
                 time.sleep(0.01)
 
             st.write(f"Nguy cơ mắc đái tháo đường: **{risk:.1f}%**")
-
             if risk >= 70:
                 st.error("Nguy cơ cao – nên đi khám và xét nghiệm HbA1c.")
             elif risk >= 40:
@@ -156,9 +202,9 @@ elif menu == "🧮 Bắt đầu dự đoán":
             else:
                 st.info("Nguy cơ thấp – hãy giữ lối sống lành mạnh.")
 
-    # ========= CHẾ ĐỘ MÁY =========
+    # ====== CHẾ ĐỘ MÁY ======
     else:
-        pregnancies = st.number_input("Số lần mang thai (nếu không có để 0):", 0, 50, 0)
+        pregnancies = st.number_input("Số lần mang thai:", 0, 50, 0)
         glucose = st.number_input("Glucose (mg/dL):", 0.0, 500.0, 120.0)
         bp = st.number_input("Huyết áp tâm trương (mmHg):", 0.0, 200.0, 70.0)
         bmi = st.number_input("BMI (kg/m²):", 0.0, 80.0, 25.0)
@@ -191,7 +237,6 @@ elif menu == "🧮 Bắt đầu dự đoán":
                 time.sleep(0.01)
 
             st.write(f"Xác suất mắc bệnh: **{risk_percent:.1f}%**")
-
             if risk_percent >= 70:
                 st.error("Nguy cơ cao – nên đi khám và xét nghiệm HbA1c.")
             elif risk_percent >= 40:
@@ -199,5 +244,5 @@ elif menu == "🧮 Bắt đầu dự đoán":
             else:
                 st.info("Nguy cơ thấp – hãy giữ lối sống lành mạnh.")
 
-st.markdown("---")
+st.markdown("<br><br>", unsafe_allow_html=True)
 st.caption("Công cụ tham khảo — không thay thế chẩn đoán y khoa.")
