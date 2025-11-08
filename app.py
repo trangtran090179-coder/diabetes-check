@@ -1,65 +1,234 @@
-# app.py
 import streamlit as st
 import base64
 import numpy as np
-import textwrap
 
-# --------- cấu hình trang ----------
-st.set_page_config(page_title="Diabetes Home Risk Checker", layout="wide")
+st.set_page_config(
+    page_title="Diabetes Risk Checker",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 
-# --------- đường dẫn ảnh nền (đặt file ảnh trong cùng thư mục) ----------
 BACKGROUND_IMAGE_PATH = "castorice-honkai-7680x4320-22114.jpg"
 
-# --------- helper: load ảnh -> base64 CSS ----------
-def set_background(img_path):
-    try:
-        with open(img_path, "rb") as f:
-            data = f.read()
-        b64 = base64.b64encode(data).decode()
-    except Exception as e:
-        st.error("Không tìm thấy ảnh nền. Hãy đặt file ảnh đúng tên hoặc thay BACKGROUND_IMAGE_PATH.")
-        return
+
+def inject_css():
+    with open(BACKGROUND_IMAGE_PATH, "rb") as f:
+        img_data = f.read()
+    b64 = base64.b64encode(img_data).decode()
 
     css = f"""
     <style>
-    /* toàn trang nền */
+
+    /* ==== BACKGROUND ==== */
     [data-testid="stAppViewContainer"] {{
-        background-image: url("data:image/jpg;base64,{b64}");
+        background-image: url("data:image/png;base64,{b64}");
         background-size: cover;
-        background-position: center center;
+        background-position: center;
+        background-repeat: no-repeat;
         background-attachment: fixed;
-        animation: fadeIn 1s ease-in-out;
+        animation: fadeIn 1.2s ease-in-out;
     }}
 
-    /* top menu kiểu game landing */
-    .topbar {{
-        position: fixed;
-        left: 0;
-        right: 0;
-        top: 0;
-        z-index: 999;
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        padding: 14px 36px;
-        background: linear-gradient(90deg, rgba(0,0,0,0.30), rgba(0,0,0,0.12));
+    /* ==== TOP NAV BAR ==== */
+    .top-nav {{
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        gap: 50px;
+        padding: 18px;
         backdrop-filter: blur(6px);
-        border-bottom: 1px solid rgba(255,255,255,0.06);
     }}
 
-    .logo {{
-        font-weight:900;
-        color: #ffffff;
-        font-size:22px;
-        letter-spacing:1px;
-        text-shadow: 0 0 10px rgba(120,200,255,0.25);
+    .nav-btn {{
+        padding: 10px 20px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        text-transform: uppercase;
+        background: rgba(255,255,255,0.15);
+        color: white;
+        transition: 0.3s;
     }}
 
-    .menu a {{
+    .nav-btn:hover {{
+        background: rgba(255,255,255,0.35);
+        transform: scale(1.05);
+    }}
+
+    /* ==== MAIN TITLE ==== */
+    .main-title {{
+        margin-top: 130px;
+        text-align: center;
+        font-size: 45px;
         color: #ffffff;
-        margin-left:18px;
-        margin-right:6px;
-        font-weight:700;
+        text-shadow: 0 0 12px #75aaff;
+        animation: fadeUp 1.3s ease;
+    }}
+
+    .sub-title {{
+        text-align: center;
+        font-size: 20px;
+        color: #d6e9ff;
+        margin-top: -10px;
+    }}
+
+    /* ==== MAIN CTA BUTTON ==== */
+    .center-btn {{
+        display: flex;
+        justify-content: center;
+        margin-top: 40px;
+    }}
+
+    .cta-btn {{
+        background: linear-gradient(90deg, #6fb5ff, #b88cff);
+        border: none;
+        padding: 14px 28px;
+        font-size: 20px;
+        border-radius: 12px;
+        font-weight: bold;
+        transition: 0.28s;
+        cursor: pointer;
+        color: black;
+    }}
+
+    .cta-btn:hover {{
+        transform: scale(1.08);
+        box-shadow: 0 0 15px #b88cff;
+    }}
+
+    /* ==== FORM BOX ==== */
+    .form-box {{
+        background: rgba(0,0,0,0.55);
+        padding: 25px;
+        border-radius: 18px;
+        box-shadow: 0 0 22px rgba(170,200,255,0.38);
+        animation: fadeUp 0.6s ease;
+    }}
+
+    .form-title {{
+        text-align: center;
+        font-size: 30px;
+        color: #d7e3ff;
+        text-shadow: 0 0 10px #75aaff;
+        margin-bottom: 10px;
+    }}
+
+    /* ==== KEYFRAME ANIMATIONS ==== */
+    @keyframes fadeIn {{
+        0% {{opacity:0;}}
+        100% {{opacity:1;}}
+    }}
+
+    @keyframes fadeUp {{
+        0% {{opacity:0; transform: translateY(25px);}}
+        100% {{opacity:1; transform: translateY(0);}}
+    }}
+
+    </style>
+    """
+    st.markdown(css, unsafe_allow_html=True)
+
+
+inject_css()
+
+# ============================= UI =============================
+# Top Menu
+st.markdown("""
+<div class='top-nav'>
+    <div class='nav-btn'>HOME</div>
+    <div class='nav-btn'>INFO</div>
+    <div class='nav-btn'>CONTACT</div>
+</div>
+""", unsafe_allow_html=True)
+
+# Main landing page text
+st.markdown("<div class='main-title'>Dự đoán nguy cơ tiểu đường ngay tại nhà</div>", unsafe_allow_html=True)
+st.markdown("<div class='sub-title'>Hệ thống đánh giá các yếu tố nguy cơ mà không cần xét nghiệm.</div>", unsafe_allow_html=True)
+
+# CTA Button
+clicked = st.button("🚀 BẮT ĐẦU DỰ ĐOÁN", key="start", help="Nhấn để vào biểu mẫu dự đoán")
+
+if not clicked:
+    st.stop()  # Chưa nhấn thì dừng ở trang đầu
+
+
+# ============================= FORM PAGE =============================
+st.markdown("<div class='form-box'>", unsafe_allow_html=True)
+
+mode = st.radio("Chế độ dự đoán:", ["Tại nhà", "Máy"], horizontal=True)
+
+# Common inputs
+age = st.number_input("Tuổi:", min_value=1, max_value=120, step=1)
+
+activity = st.selectbox("Bạn vận động bao lâu mỗi ngày?", [
+    "Ít hoặc không vận động", "10–30 phút", "30–60 phút", "Trên 1 giờ"
+])
+
+sweet = st.selectbox("Bạn uống nước ngọt/đồ uống có đường?", [
+    "Hầu như không", "1–2 lần/tuần", "3–6 lần/tuần", "Mỗi ngày"
+])
+
+symptoms = st.multiselect("Bạn có triệu chứng nào sau đây?", [
+    "Khát nước nhiều", "Đi tiểu nhiều", "Giảm cân nhanh", "Mệt mỏi", "Nhìn mờ"
+])
+
+weight = st.selectbox("Bạn cảm thấy cơ thể dư cân không?", [
+    "Không", "Có, hơi dư cân", "Có, thừa cân rõ"
+])
+
+waist = st.selectbox("Vòng bụng:", [
+    "Bình thường", "Hơi to", "To rõ"
+])
+
+# ====== EXTRA INPUTS FOR MACHINE MODE ======
+if mode == "Máy":
+    bmi = st.number_input("BMI:", min_value=10.0, max_value=60.0, step=0.1)
+    glucose = st.number_input("Đường huyết lúc đói (mg/dL):", min_value=50, max_value=300, step=1)
+
+st.markdown("</div>", unsafe_allow_html=True)
+st.write("")
+
+if st.button("✅ TÍNH NGUY CƠ"):
+
+    score = 0
+    if age >= 45: score += 2
+    if age >= 60: score += 3
+
+    if activity == "Ít hoặc không vận động": score += 2
+    elif activity == "10–30 phút": score += 1
+
+    if sweet == "Mỗi ngày": score += 2
+    elif sweet == "3–6 lần/tuần": score += 1
+
+    score += len(symptoms)
+
+    if weight == "Có, hơi dư cân": score += 1
+    elif weight == "Có, thừa cân rõ": score += 2
+
+    if waist == "Hơi to": score += 1
+    elif waist == "To rõ": score += 2
+
+    # MACHINE MODE = thêm chỉ số thật
+    if mode == "Máy":
+        if bmi > 25: score += 2
+        if glucose > 126: score += 3
+        elif glucose > 100: score += 1
+
+    risk_pct = min(score * 6, 100)
+
+    st.subheader("✅ Kết quả dự đoán")
+    st.progress(risk_pct / 100)
+    st.success(f"Nguy cơ mắc đái tháo đường: **{risk_pct:.1f}%**")
+
+    if risk_pct >= 70:
+        st.error("🚨 Nguy cơ cao – nên đi khám và xét nghiệm HbA1c.")
+    elif risk_pct >= 40:
+        st.warning("⚠ Nguy cơ trung bình – nên kiểm soát chế độ ăn và vận động.")
+    else:
+        st.info("✅ Nguy cơ thấp – tiếp tục duy trì lối sống lành mạnh!")
+
+st.markdown("---")
+st.caption("© StellaSora Health • Công cụ tham khảo, không thay thế bác sĩ.")
         text-decoration:none;
         cursor:pointer;
         transition: .18s;
