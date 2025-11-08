@@ -25,20 +25,18 @@ def set_background(img_path):
 
     css = f"""
     <style>
-    /* ẨN GIAO DIỆN THỪA CỦA STREAMLIT */
-    #MainMenu, header, footer, [data-testid="stDecoration"], [data-testid="stStatusWidget"], section[data-testid="stSidebar"], div[data-testid="stToolbar"], div[data-testid="stHeader"] {{
+    /* ẨN TOÀN BỘ HEADER, FOOTER, MARGIN */
+    #MainMenu, header, footer, [data-testid="stDecoration"],
+    [data-testid="stStatusWidget"], section[data-testid="stSidebar"],
+    div[data-testid="stToolbar"], div[data-testid="stHeader"] {{
         display: none !important;
     }}
 
-    /* Loại bỏ margin mặc định */
     .block-container {{
-        padding-top: 0rem !important;
-        padding-bottom: 0rem !important;
-        padding-left: 0rem !important;
-        padding-right: 0rem !important;
+        padding: 0 !important;
+        margin: 0 auto !important;
     }}
 
-    /* NỀN ANIME */
     [data-testid="stAppViewContainer"] {{
         {"background-image: url('data:image/jpg;base64,"+b64+"');" if b64 else ""}
         background-size: cover;
@@ -48,17 +46,24 @@ def set_background(img_path):
         color: white;
     }}
 
-    /* HỘP CHÍNH */
-    div.block-container > div {{
+    /* HỘP TRUNG TÂM */
+    .mainbox {{
         background: rgba(0, 0, 0, 0.55);
-        border-radius: 18px;
-        padding: 2rem;
+        border-radius: 20px;
+        padding: 2.2rem;
         box-shadow: 0 0 25px rgba(140, 190, 255, 0.3);
         color: #ffffff;
         max-width: 850px;
         margin: 160px auto;
-        backdrop-filter: blur(4px);
-        animation: fadeIn 1s ease-in-out;
+        backdrop-filter: blur(6px);
+        animation: fadeUp 1s ease-in-out;
+    }}
+
+    /* ANIMATION: TRƯỢT LÊN + MỜ DẦN */
+    @keyframes fadeUp {{
+        0% {{opacity: 0; transform: translateY(40px) scale(0.98);}}
+        50% {{opacity: 0.6; transform: translateY(15px) scale(1.01);}}
+        100% {{opacity: 1; transform: translateY(0) scale(1);}}
     }}
 
     /* CHỮ & LABEL */
@@ -83,17 +88,21 @@ def set_background(img_path):
         box-shadow: 0 0 12px #b88cff;
     }}
 
-    /* ANIMATION */
-    @keyframes fadeIn {{
-        from {{opacity: 0; transform: translateY(20px);}}
-        to {{opacity: 1; transform: translateY(0);}}
+    /* Hiệu ứng nhấn nút chính */
+    .startButton>button {{
+        font-size: 1.1rem;
+        width: 250px;
+        height: 60px;
+        background: linear-gradient(90deg, #9ecbff, #d5a6ff);
+        border-radius: 12px;
+        color: black;
+        font-weight: 700;
+        transition: all 0.25s ease;
+        box-shadow: 0 0 20px rgba(160, 200, 255, 0.3);
     }}
-    @keyframes slideUpFade {{
-        0% {{opacity: 0; transform: translateY(40px);}}
-        100% {{opacity: 1; transform: translateY(0);}}
-    }}
-    .fadeBox {{
-        animation: slideUpFade 1s ease;
+    .startButton>button:hover {{
+        transform: scale(1.08);
+        box-shadow: 0 0 25px rgba(200, 160, 255, 0.5);
     }}
     </style>
     """
@@ -107,18 +116,19 @@ if "show_form" not in st.session_state:
 
 # --- Trang chào ---
 if not st.session_state.show_form:
-    st.markdown("<div class='fadeBox'>", unsafe_allow_html=True)
-    st.title(" DỰ ĐOÁN NGUY CƠ MẮC ĐÁI THÁO ĐƯỜNG ")
+    st.markdown("<div class='mainbox'>", unsafe_allow_html=True)
+    st.title( "DỰ ĐOÁN NGUY CƠ MẮC ĐÁI THÁO ĐƯỜNG")
     st.write("Ứng dụng giúp bạn đánh giá nhanh nguy cơ mắc bệnh dựa trên lối sống hoặc chỉ số y tế cơ bản.")
     st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("Bắt đầu dự đoán"):
+    if st.button("Bắt đầu dự đoán", key="start", use_container_width=False):
         st.session_state.show_form = True
         st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
     st.stop()
 
 # --- Form chính ---
-st.markdown("<div class='fadeBox'>", unsafe_allow_html=True)
+st.markdown("<div class='mainbox'>", unsafe_allow_html=True)
+
 mode = st.selectbox("Chọn chế độ:", ["Tại nhà", "Chế độ máy"])
 st.markdown("---")
 
@@ -137,7 +147,7 @@ def home_mode():
     belly = st.selectbox("Vòng bụng:", ["Bình thường","Hơi to","To rõ"])
     over = st.selectbox("Cảm giác dư cân:", ["Không","Có, hơi dư cân","Có, thừa cân rõ"])
 
-    if st.button("Dự đoán"):
+    if st.button("Dự đoán", key="home_predict"):
         score = 0
         if age >= 45: score += 2
         if age >= 60: score += 3
@@ -175,7 +185,7 @@ def hospital_mode():
     bmi = st.number_input("BMI (kg/m²):", 0.0, 80.0, 0.0)
     age = st.number_input("Tuổi:", 1, 120, 1)
 
-    if st.button("Dự đoán"):
+    if st.button("Dự đoán", key="hospital_predict"):
         url = "https://raw.githubusercontent.com/jbrownlee/Datasets/master/pima-indians-diabetes.data.csv"
         cols = ["Pregnancies","Glucose","BloodPressure","SkinThickness","Insulin","BMI","DiabetesPedigree","Age","Outcome"]
         df = pd.read_csv(url, header=None, names=cols)
