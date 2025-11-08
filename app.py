@@ -1,10 +1,14 @@
 import streamlit as st
 import numpy as np
+import pandas as pd
 import base64
 import time
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
 
+# ==================== CẤU HÌNH GIAO DIỆN ====================
 st.set_page_config(
-    page_title="Diabetes Risk Checker",
+    page_title="Dự đoán nguy cơ mắc đái tháo đường",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
@@ -21,37 +25,49 @@ def set_background(img_path):
 
     css = f"""
     <style>
+    /* ẨN GIAO DIỆN THỪA CỦA STREAMLIT */
+    #MainMenu, header, footer, [data-testid="stDecoration"], [data-testid="stStatusWidget"], section[data-testid="stSidebar"], div[data-testid="stToolbar"], div[data-testid="stHeader"] {{
+        display: none !important;
+    }}
+
+    /* Loại bỏ margin mặc định */
+    .block-container {{
+        padding-top: 0rem !important;
+        padding-bottom: 0rem !important;
+        padding-left: 0rem !important;
+        padding-right: 0rem !important;
+    }}
+
+    /* NỀN ANIME */
     [data-testid="stAppViewContainer"] {{
         {"background-image: url('data:image/jpg;base64,"+b64+"');" if b64 else ""}
         background-size: cover;
         background-position: center;
-        background-repeat: no-repeat;
         background-attachment: fixed;
-        animation: fadeIn 1s ease-in-out;
-        background-color: #000;
+        background-repeat: no-repeat;
+        color: white;
     }}
 
-    div.block-container {{
+    /* HỘP CHÍNH */
+    div.block-container > div {{
         background: rgba(0, 0, 0, 0.55);
         border-radius: 18px;
-        padding: 1.6rem;
-        box-shadow: 0 0 20px rgba(170, 200, 255, 0.28);
+        padding: 2rem;
+        box-shadow: 0 0 25px rgba(140, 190, 255, 0.3);
         color: #ffffff;
-        animation: slideUp 0.6s ease-out;
-        max-width: 900px;
-        margin: auto;
+        max-width: 850px;
+        margin: 160px auto;
+        backdrop-filter: blur(4px);
+        animation: fadeIn 1s ease-in-out;
     }}
 
-    h1, h2, h3 {{
-        color: #d7e3ff;
-        text-shadow: 0 0 8px #75aaff;
-        text-align: center;
+    /* CHỮ & LABEL */
+    h1, h2, h3, label, p, span {{
+        color: #fff !important;
+        text-shadow: 0 0 8px #a4c8ff;
     }}
 
-    label {{
-        color: white !important;
-    }}
-
+    /* NÚT */
     .stButton>button {{
         background: linear-gradient(90deg, #6fb5ff, #b88cff);
         border-radius: 10px;
@@ -59,22 +75,25 @@ def set_background(img_path):
         color: black;
         width: 100%;
         padding: 0.6rem;
-        font-weight: bold;
+        font-weight: 600;
         transition: 0.18s;
     }}
-
     .stButton>button:hover {{
         transform: scale(1.05);
         box-shadow: 0 0 12px #b88cff;
     }}
 
+    /* ANIMATION */
     @keyframes fadeIn {{
-        0% {{opacity: 0;}}
-        100% {{opacity: 1;}}
+        from {{opacity: 0; transform: translateY(20px);}}
+        to {{opacity: 1; transform: translateY(0);}}
     }}
-    @keyframes slideUp {{
-        0% {{transform: translateY(18px); opacity: 0;}}
-        100% {{transform: translateY(0); opacity: 1;}}
+    @keyframes slideUpFade {{
+        0% {{opacity: 0; transform: translateY(40px);}}
+        100% {{opacity: 1; transform: translateY(0);}}
+    }}
+    .fadeBox {{
+        animation: slideUpFade 1s ease;
     }}
     </style>
     """
@@ -82,23 +101,37 @@ def set_background(img_path):
 
 set_background(BACKGROUND_IMAGE_PATH)
 
-st.title("DỰ ĐOÁN NGUY CƠ MẮC ĐÁI THÁO ĐƯỜNG")
+# ==================== NỘI DUNG CHÍNH ====================
+if "show_form" not in st.session_state:
+    st.session_state.show_form = False
 
+# --- Trang chào ---
+if not st.session_state.show_form:
+    st.markdown("<div class='fadeBox'>", unsafe_allow_html=True)
+    st.title(" DỰ ĐOÁN NGUY CƠ MẮC ĐÁI THÁO ĐƯỜNG ")
+    st.write("Ứng dụng giúp bạn đánh giá nhanh nguy cơ mắc bệnh dựa trên lối sống hoặc chỉ số y tế cơ bản.")
+    st.markdown("<br>", unsafe_allow_html=True)
+    if st.button("Bắt đầu dự đoán"):
+        st.session_state.show_form = True
+        st.rerun()
+    st.markdown("</div>", unsafe_allow_html=True)
+    st.stop()
+
+# --- Form chính ---
+st.markdown("<div class='fadeBox'>", unsafe_allow_html=True)
 mode = st.selectbox("Chọn chế độ:", ["Tại nhà", "Chế độ máy"])
 st.markdown("---")
 
-
-# ========== TẠI NHÀ ==========
 def home_mode():
-    age = st.number_input("Tuổi:", 1, 120, 1)
-    activity = st.selectbox("Bạn vận động bao lâu mỗi ngày?", [
+    age = st.number_input("Tuổi:", 1, 120, 25)
+    activity = st.selectbox("Mức vận động mỗi ngày:", [
         "Ít hoặc không vận động", "10–30 phút", "30–60 phút", "Trên 1 giờ"
     ])
-    sweet = st.selectbox("Bạn uống nước ngọt/đồ uống có đường?", [
+    sweet = st.selectbox("Uống đồ ngọt:", [
         "Hầu như không","1–2 lần/tuần","3–6 lần/tuần","Mỗi ngày"
     ])
-    family = st.selectbox("Gia đình có người mắc đái tháo đường?", ["Không","Có"])
-    symptoms = st.multiselect("Bạn có các triệu chứng sau không?", [
+    family = st.selectbox("Gia đình có người mắc bệnh:", ["Không","Có"])
+    symptoms = st.multiselect("Triệu chứng:", [
         "Khát nước nhiều","Đi tiểu nhiều","Giảm cân nhanh","Mệt mỏi","Nhìn mờ"
     ])
     belly = st.selectbox("Vòng bụng:", ["Bình thường","Hơi to","To rõ"])
@@ -122,16 +155,12 @@ def home_mode():
         risk = min(score * 6, 100)
 
         st.markdown("### Kết quả:")
-
-        # ✅ Animation progress bar
         bar = st.progress(0)
         for i in range(0, int(risk)+1):
             bar.progress(i/100)
-            time.sleep(0.010)
-
+            time.sleep(0.01)
         st.write(f"Nguy cơ mắc đái tháo đường: **{risk:.1f}%**")
 
-        # ✅ Cảnh báo giống chế độ máy
         if risk >= 70:
             st.error("Nguy cơ cao – nên đi khám và xét nghiệm HbA1c.")
         elif risk >= 40:
@@ -139,13 +168,7 @@ def home_mode():
         else:
             st.info("Nguy cơ thấp – hãy giữ lối sống lành mạnh.")
 
-
-# ========== CHẾ ĐỘ MÁY ==========
 def hospital_mode():
-    import pandas as pd
-    from sklearn.model_selection import train_test_split
-    from sklearn.linear_model import LogisticRegression
-
     pregnancies = st.number_input("Số lần mang thai (nếu không có để 0):", 0, 50, 0)
     glucose = st.number_input("Glucose (mg/dL):", 0.0, 500.0, 0.0)
     bp = st.number_input("Huyết áp tâm trương (mmHg):", 0.0, 200.0, 0.0)
@@ -155,7 +178,6 @@ def hospital_mode():
     if st.button("Dự đoán"):
         url = "https://raw.githubusercontent.com/jbrownlee/Datasets/master/pima-indians-diabetes.data.csv"
         cols = ["Pregnancies","Glucose","BloodPressure","SkinThickness","Insulin","BMI","DiabetesPedigree","Age","Outcome"]
-
         df = pd.read_csv(url, header=None, names=cols)
         df = df.drop(columns=["SkinThickness","Insulin","DiabetesPedigree"])
 
@@ -166,10 +188,7 @@ def hospital_mode():
         X = df.drop(columns=["Outcome"])
         y = df["Outcome"]
 
-        from sklearn.model_selection import train_test_split
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-        from sklearn.linear_model import LogisticRegression
         model = LogisticRegression(max_iter=1000, solver='liblinear')
         model.fit(X_train, y_train)
 
@@ -178,12 +197,10 @@ def hospital_mode():
         risk_percent = proba * 100
 
         st.markdown("### Kết quả:")
-
         bar = st.progress(0)
         for i in range(0, int(risk_percent)+1):
             bar.progress(i/100)
-            time.sleep(0.010)
-
+            time.sleep(0.01)
         st.write(f"Xác suất mắc bệnh: **{risk_percent:.1f}%**")
 
         if risk_percent >= 70:
@@ -193,12 +210,10 @@ def hospital_mode():
         else:
             st.info("Nguy cơ thấp – hãy giữ lối sống lành mạnh.")
 
-
-# ========== RUN UI ==========
+# Hiển thị form
 if mode == "Tại nhà":
     home_mode()
 else:
     hospital_mode()
 
-st.markdown("---")
-st.caption("Công cụ tham khảo — không thay thế chẩn đoán y khoa.")
+st.markdown("</div>", unsafe_allow_html=True)
